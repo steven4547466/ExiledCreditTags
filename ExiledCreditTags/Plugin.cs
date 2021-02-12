@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
 
 namespace ExiledCreditTags
 {
     using System;
     using System.Collections.Generic;
+    using System.Net;
     using Exiled.API.Features;
     using MEC;
     using Player = Exiled.Events.Handlers.Player;
@@ -16,51 +20,13 @@ namespace ExiledCreditTags
     {
         public override string Name { get; } = "Exiled tags";
         public override string Author { get; } = "Babyboucher20";
-        public override Version Version { get; } = new Version(1, 0, 0);
+        public override Version Version { get; } = new Version(1, 1, 0);
         public override Version RequiredExiledVersion { get; } = new Version(2, 1, 29);
         public override string Prefix { get; } = "Exiled tags";
 
         public EventHandlers.EventHandlers PlayerHandlers;
 
-        public Dictionary<String, string> CreditTags { get; set; } = new Dictionary<String, string>
-        {
-            {
-                "76561198294763508@steam", "Exiled Dev" //iRebbok
-            },
-            {
-                "76561198119888517@steam", "Exiled Plugin Dev" //Babyboucher20
-            },
-            {
-                "76561198194226753@steam", "Exiled Contributor" //初音早猫
-            },
-            {
-                "76561198224529388@steam", "Exiled Contributor" //DGvagabond
-            },
-            {
-                "76561198037519280@steam", "Exiled Contributor" //KadeDev
-            },
-            {
-                "76561198023272004@steam", "Exiled Dev" //iopietro
-            },
-            {
-                "76561198199188486@steam", "Exiled Contributor" //Thunder
-            },
-            {
-                "76561198164512098@steam", "Exiled Contributor" // Virtual
-            },
-            {
-                "76561198142449742@steam", "Exiled Contributor" // JasKill
-            },
-            {
-                "76561198832820936@steam", "Exiled Contributor" //Killers0992
-            },
-            {
-                "76561198347253445@steam", "Exiled Plugin Dev" // Terminator_97
-            },
-            {
-                "76561198230639680@steam", "Exiled Plugin Dev" // Thomasjosif
-            }
-        };
+        public Dictionary<String, string> CreditTags { get; set; }  = GetURL();
 
         public override void OnEnabled()
         {
@@ -73,6 +39,20 @@ namespace ExiledCreditTags
         {
             Player.Verified -= PlayerHandlers.OnPlayerVerify;
             base.OnDisabled();
+        }
+
+        public static Dictionary<string, string> GetURL()
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://gist.githubusercontent.com/babyboucher/89b23cd569e759c57f458df0411588fe/raw/PublicIDs");
+            request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (Stream stream = response.GetResponseStream())
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                Dictionary<string, string> dict = Utf8Json.JsonSerializer.Deserialize<Dictionary<string, string>>(reader.ReadToEnd());
+                return dict;
+            }
         }
     }
 }
