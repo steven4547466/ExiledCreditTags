@@ -18,6 +18,8 @@ namespace ExiledCreditTags
 
     public class Plugin : Exiled.API.Features.Plugin<Config>
     {
+        public static Plugin Instance;
+
         public override string Name { get; } = "Exiled tags";
         public override string Author { get; } = "Babyboucher20";
         public override Version Version { get; } = new Version(1, 1, 0);
@@ -26,11 +28,12 @@ namespace ExiledCreditTags
 
         public EventHandlers.EventHandlers PlayerHandlers;
 
-        public Dictionary<String, string> CreditTags { get; set; }  = GetURL();
+        public Dictionary<string, int> CreditTags { get; set; }  = GetURL();
 
         public override void OnEnabled()
         {
-            PlayerHandlers = new EventHandlers.EventHandlers(this);
+            Instance = this;
+            PlayerHandlers = new EventHandlers.EventHandlers();
             Player.Verified += PlayerHandlers.OnPlayerVerify;
             base.OnEnabled();
         }
@@ -41,18 +44,25 @@ namespace ExiledCreditTags
             base.OnDisabled();
         }
 
-        public static Dictionary<string, string> GetURL()
+        public static Dictionary<string, int> GetURL()
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://gist.githubusercontent.com/babyboucher/89b23cd569e759c57f458df0411588fe/raw/PublicIDs");
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://gist.githubusercontent.com/steven4547466/a65f05599a04f069f322ea07f12cf232/raw/roles.json");
             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
             using (Stream stream = response.GetResponseStream())
             using (StreamReader reader = new StreamReader(stream))
             {
-                Dictionary<string, string> dict = Utf8Json.JsonSerializer.Deserialize<Dictionary<string, string>>(reader.ReadToEnd());
+                Dictionary<string, int> dict = Utf8Json.JsonSerializer.Deserialize<Dictionary<string, int>>(reader.ReadToEnd());
                 return dict;
             }
         }
+
+        public enum Role
+		{
+            ExiledDeveloper = 1,
+            ExiledContributor = 2,
+            PluginDeveloper = 4
+		}
     }
 }

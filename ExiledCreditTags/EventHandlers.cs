@@ -8,53 +8,60 @@
     using System.Text;
     using Hints;
     using System.Collections.Generic;
+	using MEC;
 
-    public class EventHandlers
+	public class EventHandlers
     {
-        private readonly Plugin plugin;
-        public EventHandlers(Plugin plugin) => this.plugin = plugin;
 
-        Random random = new Random();
+        public static Dictionary<Player, Tuple<string, string>> startingBadgesAndColors = new Dictionary<Player, Tuple<string, string>>();
+
         public void OnPlayerVerify(VerifiedEventArgs ev)
         {
-            string PlayerID = HashSh1(ev.Player.UserId);
-            if (plugin.CreditTags.ContainsKey(PlayerID))
+            Timing.CallDelayed(0.5f, () =>
             {
-                if ((ev.Player.RankName == null || plugin.Config.BadgeOverride) && plugin.Config.UseBadge)
+                startingBadgesAndColors.Add(ev.Player, new Tuple<string, string>(ev.Player.RankName, ev.Player.RankColor));
+                string PlayerID = HashSh1(ev.Player.UserId);
+                if (Plugin.Instance.CreditTags.ContainsKey(PlayerID))
                 {
-                    ev.Player.RankName = plugin.CreditTags[PlayerID];
-                    switch (plugin.CreditTags[PlayerID])
-                    {
-                    case "Exiled Plugin Dev":
-                        ev.Player.RankColor = "crimson";
-                        break;
-                    case "Exiled Contributor":
-                        ev.Player.RankColor = "cyan";
-                        break;
-                    case "Exiled Dev":
-                        ev.Player.RankColor = "magenta";
-                        break;
-                    };
+                    Plugin.Role role = (Plugin.Role)Plugin.Instance.CreditTags[PlayerID];
+                    string[] nameAndColors = RoleToNameAndColors(role);
+                    EnableBadgeOrCPT(ev.Player, nameAndColors);
                 }
+            });
+        }
 
-                if ((ev.Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString == null || plugin.Config.CPTOverride) && !(plugin.Config.UseBadge))
-                {
-                    switch (plugin.CreditTags[PlayerID])
-                    {
-                    case "Exiled Plugin Dev":
-                        ev.Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = "<color=#DC143C>Exiled Plugin Dev</color>";
-                        break;
-                    case "Exiled Contributor":
-                        ev.Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = "<color=#800080>Exiled Contributor</color>";
-                        break;
-                    case "Exiled Dev":
-                        ev.Player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = "<color=#00FFFF>Exiled Dev</color>";
-                        break;
-                    };
-                }
+        public static void EnableBadgeOrCPT(Player player, string[] nameAndColors)
+		{
+            if (Plugin.Instance.Config.UseBadge && (Plugin.Instance.Config.BadgeOverride || player.RankName == string.Empty))
+            {
+                player.RankName = nameAndColors[0];
+                player.RankColor = nameAndColors[1];
+            }
+            else if (!Plugin.Instance.Config.UseBadge && (Plugin.Instance.Config.CPTOverride || player.ReferenceHub.nicknameSync.Network_customPlayerInfoString == string.Empty))
+            {
+                player.ReferenceHub.nicknameSync.Network_customPlayerInfoString = $"<color=#{nameAndColors[2]}>{nameAndColors[0]}</color>";
             }
         }
-        static string HashSh1(string input)
+
+        public static string[] RoleToNameAndColors (Plugin.Role role)
+		{
+            if ((role & Plugin.Role.ExiledDeveloper) == Plugin.Role.ExiledDeveloper)
+			{
+                return new string[3] { "Exiled Dev", "magenta", "00FFFF" };
+            }
+            else if ((role & Plugin.Role.ExiledContributor) == Plugin.Role.ExiledContributor)
+			{
+                return new string[3] { "Exiled Contributor", "cyan", "800080" };
+            }
+            else if ((role & Plugin.Role.PluginDeveloper) == Plugin.Role.PluginDeveloper)
+			{
+                return new string[3] { "Exiled Plugin Dev", "crimson", "DC143C" };
+            }
+            else 
+                return new string[3];
+		}
+
+        public static string HashSh1(string input)
         {
             using (SHA1Managed sha1 = new SHA1Managed())
             {
@@ -71,7 +78,7 @@
                 }
 
                 // final output
-                Console.WriteLine(string.Format("The SHA1 hash of {0} is: {1}", input, sb.ToString()));
+                Log.Debug(string.Format("The SHA1 hash of {0} is: {1}", input, sb.ToString()));
 
                 return sb.ToString();
             }
