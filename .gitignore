@@ -2,3 +2,7 @@
 ExiledCreditTags/bin/
 
 ExiledCreditTags/obj/
+
+.vs/
+
+packages/
