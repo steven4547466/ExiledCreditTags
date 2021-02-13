@@ -56,7 +56,7 @@ namespace ExiledCreditTags.Commands
 				while ((Plugin.Instance.CreditTags[PlayerID] & (int)tempRole) == 0)
 				{
 					tempRole = (Plugin.Role)((int)tempRole << 1);
-					if (tempRole == 0) tempRole = (Plugin.Role)Plugin.Instance.CreditTags[PlayerID];
+					if (tempRole > Plugin.Role.PluginDeveloper) tempRole = EventHandlers.EventHandlers.HighestRole((Plugin.Role)Plugin.Instance.CreditTags[PlayerID]);
 				}
 				role = tempRole;
 
