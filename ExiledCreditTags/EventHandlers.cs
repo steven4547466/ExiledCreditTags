@@ -43,7 +43,22 @@
             }
         }
 
-        public static string[] RoleToNameAndColors (Plugin.Role role)
+        public static Plugin.Role TagToRole(string tag)
+		{
+            switch(tag)
+			{
+                case "Exiled Dev":
+                    return Plugin.Role.ExiledDeveloper;
+                case "Exiled Contributor":
+                    return Plugin.Role.ExiledContributor;
+                case "Exiled Plugin Dev":
+                    return Plugin.Role.PluginDeveloper;
+                default:
+                    return Plugin.Role.None;
+            }
+		}
+
+        public static string[] RoleToNameAndColors(Plugin.Role role)
 		{
             if ((role & Plugin.Role.ExiledDeveloper) == Plugin.Role.ExiledDeveloper)
 			{
@@ -59,6 +74,24 @@
             }
             else 
                 return new string[3];
+		}
+
+        public static Plugin.Role HighestRole(Plugin.Role role)
+		{
+            if ((role & Plugin.Role.ExiledDeveloper) == Plugin.Role.ExiledDeveloper)
+            {
+                return Plugin.Role.ExiledDeveloper;
+            }
+            else if ((role & Plugin.Role.ExiledContributor) == Plugin.Role.ExiledContributor)
+            {
+                return Plugin.Role.ExiledContributor;
+            }
+            else if ((role & Plugin.Role.PluginDeveloper) == Plugin.Role.PluginDeveloper)
+            {
+                return Plugin.Role.PluginDeveloper;
+            }
+            else
+                return Plugin.Role.None;
 		}
 
         public static string HashSh1(string input)

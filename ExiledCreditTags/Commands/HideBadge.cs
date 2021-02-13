@@ -45,8 +45,6 @@ namespace ExiledCreditTags.Commands
 				if (Plugin.Instance.Config.UseBadge)
 				{
 					Tuple<string, string> badgeAndColor = EventHandlers.EventHandlers.startingBadgesAndColors[player];
-					Log.Debug(badgeAndColor.Item1);
-					Log.Debug(badgeAndColor.Item2);
 					player.RankName = badgeAndColor.Item1;
 					player.RankColor = badgeAndColor.Item2;
 				} 

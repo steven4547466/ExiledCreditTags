@@ -60,6 +60,7 @@ namespace ExiledCreditTags
 
         public enum Role
 		{
+            None = 0,
             ExiledDeveloper = 1,
             ExiledContributor = 2,
             PluginDeveloper = 4
